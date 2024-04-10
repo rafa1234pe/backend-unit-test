@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenderMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.user.mapping</a> &gt; <span class="el_source">GenderMapper.java</span></div><h1>GenderMapper.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.user.mapping;
+
+import com.upc.TuCine.TuCine.shared.mapping.EnhancedModelMapper;
+import com.upc.TuCine.TuCine.user.domain.enumeration.Genders;
+import com.upc.TuCine.TuCine.user.domain.model.Gender;
+import com.upc.TuCine.TuCine.user.resource.GenderDto;
+import org.modelmapper.AbstractConverter;
+import org.modelmapper.Converter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Component
+<span class="fc" id="L19">public class GenderMapper implements Serializable {</span>
+
+    @Autowired
+    EnhancedModelMapper mapper;
+
+<span class="fc" id="L24">    Converter&lt;Genders, String&gt; genderToString = new AbstractConverter&lt;&gt;() {</span>
+        @Override
+        protected String convert(Genders gender) {
+<span class="nc bnc" id="L27" title="All 2 branches missed.">            return gender == null ? null : gender.name();</span>
+        }
+    };
+
+    // Object Mapping
+    public GenderDto toResource(Gender model) {
+<span class="nc" id="L33">        mapper.addConverter(genderToString);</span>
+<span class="nc" id="L34">        return mapper.map(model, GenderDto.class);</span>
+    }
+
+    public List&lt;GenderDto&gt; toResourceList(List&lt;Gender&gt; modelList) {
+<span class="nc" id="L38">        mapper.addConverter(genderToString);</span>
+<span class="nc" id="L39">        return mapper.mapList(modelList, GenderDto.class);</span>
+    }
+
+    public Gender toModel(GenderDto resource){
+<span class="nc" id="L43">        return mapper.map(resource,Gender.class);</span>
+    }
+
+    public Page&lt;GenderDto&gt; modelListToPage(List&lt;Gender&gt; modelList, Pageable pageable) {
+<span class="nc" id="L47">        mapper.addConverter(genderToString);</span>
+<span class="nc" id="L48">        return new PageImpl&lt;&gt;(mapper.mapList(modelList, GenderDto.class), pageable, modelList.size());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

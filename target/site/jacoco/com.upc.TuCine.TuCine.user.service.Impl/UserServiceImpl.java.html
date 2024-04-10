@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.user.service.Impl</a> &gt; <span class="el_source">UserServiceImpl.java</span></div><h1>UserServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.user.service.Impl;
+
+import com.upc.TuCine.TuCine.shared.exception.ResourceNotFoundException;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import com.upc.TuCine.TuCine.shared.mapping.EnhancedModelMapper;
+import com.upc.TuCine.TuCine.user.domain.communication.LoginRequest;
+import com.upc.TuCine.TuCine.user.domain.communication.RegisterRequest;
+import com.upc.TuCine.TuCine.user.domain.communication.UpdateRequest;
+import com.upc.TuCine.TuCine.user.domain.enumeration.Genders;
+import com.upc.TuCine.TuCine.user.domain.enumeration.TypeUsers;
+import com.upc.TuCine.TuCine.user.domain.model.Gender;
+import com.upc.TuCine.TuCine.user.domain.model.TypeUser;
+import com.upc.TuCine.TuCine.user.domain.model.User;
+import com.upc.TuCine.TuCine.user.mapping.UserMapper;
+import com.upc.TuCine.TuCine.user.persistence.GenderRepository;
+import com.upc.TuCine.TuCine.user.persistence.TypeUserRepository;
+import com.upc.TuCine.TuCine.user.persistence.UserRepository;
+import com.upc.TuCine.TuCine.user.resource.TypeUserDto;
+import com.upc.TuCine.TuCine.user.resource.UserDto;
+import com.upc.TuCine.TuCine.user.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.hibernate.usertype.DynamicParameterizedType.ENTITY;
+
+@Service
+public class UserServiceImpl implements UserService {
+
+<span class="fc" id="L38">    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);</span>
+
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private GenderRepository genderRepository;
+    @Autowired
+    private TypeUserRepository typeUserRepository;
+
+    @Autowired
+    private EnhancedModelMapper enhancedMapper;
+
+    private UserMapper mapper;
+
+<span class="fc" id="L52">    UserServiceImpl(UserMapper userMapper) {</span>
+<span class="fc" id="L53">        this.mapper = userMapper;</span>
+<span class="fc" id="L54">    }</span>
+
+    @Override
+    public List&lt;UserDto&gt; getAllUsers() {
+<span class="nc" id="L58">        return mapper.modelListToResource(userRepository.findAll());</span>
+    }
+
+    @Override
+    public UserDto getById(Integer userId) {
+<span class="nc" id="L63">        return mapper.toResource(userRepository.findById(userId)</span>
+<span class="nc" id="L64">                .orElseThrow(()-&gt; new ResourceNotFoundException(ENTITY,userId)));</span>
+    }
+
+    @Override
+    public TypeUserDto getTypeUserById(Integer id) {
+<span class="nc" id="L69">        User person = userRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (person == null) {</span>
+<span class="nc" id="L71">            return null;</span>
+        }
+<span class="nc" id="L73">        return enhancedMapper.map(person.getTypeUser(), TypeUserDto.class);</span>
+    }
+
+    @Override
+    public boolean existsByUserEmail(String email) {
+<span class="nc" id="L78">        return userRepository.existsUserByEmail(email);</span>
+    }
+
+    @Override
+    public boolean existsUserByDni(String Dni) {
+<span class="nc" id="L83">        return userRepository.existsUserByDni(Dni);</span>
+    }
+
+    @Override
+    public ResponseEntity&lt;?&gt; register(RegisterRequest request) {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (userRepository.existsByEmail(request.getEmail())) {</span>
+<span class="nc" id="L89">            throw new ValidationException(&quot;Ya existe una persona registrada con ese email&quot;);</span>
+        }
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (userRepository.existsByDni(request.getDni())) {</span>
+<span class="nc" id="L92">            throw new ValidationException(&quot;Ya existe una persona registrada con ese DNI&quot;);</span>
+        }
+
+        try {
+<span class="nc" id="L96">            Set&lt;String&gt; rolesStringSet = request.getTypeUser();</span>
+<span class="nc" id="L97">            Set&lt;TypeUser&gt; roles = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L98">            Set&lt;String&gt; gendersStringSet = request.getGender();</span>
+<span class="nc" id="L99">            Set&lt;Gender&gt; genders = new HashSet&lt;&gt;();</span>
+
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if (rolesStringSet == null) {</span>
+<span class="nc" id="L102">                typeUserRepository.findByName(TypeUsers.BUSINESS)</span>
+<span class="nc" id="L103">                        .map(roles::add)</span>
+<span class="nc" id="L104">                        .orElseThrow(() -&gt; new RuntimeException(&quot;TypeUser not found.&quot;));</span>
+            } else {
+<span class="nc" id="L106">                rolesStringSet.forEach(roleString -&gt;</span>
+<span class="nc" id="L107">                        typeUserRepository.findByName(TypeUsers.valueOf(roleString))</span>
+<span class="nc" id="L108">                                .map(roles::add)</span>
+<span class="nc" id="L109">                                .orElseThrow(() -&gt; new RuntimeException(&quot;TypeUser not found.&quot;)));</span>
+            }
+
+<span class="nc bnc" id="L112" title="All 2 branches missed.">            if (gendersStringSet == null) {</span>
+<span class="nc" id="L113">                genderRepository.findByName(Genders.FEMALE)</span>
+<span class="nc" id="L114">                        .map(genders::add)</span>
+<span class="nc" id="L115">                        .orElseThrow(() -&gt; new RuntimeException(&quot;Gender not found.&quot;));</span>
+            } else {
+<span class="nc" id="L117">                gendersStringSet.forEach(genderString -&gt;</span>
+<span class="nc" id="L118">                        genderRepository.findByName(Genders.valueOf(genderString))</span>
+<span class="nc" id="L119">                                .map(genders::add)</span>
+<span class="nc" id="L120">                                .orElseThrow(() -&gt; new RuntimeException(&quot;Gender not found.&quot;)));</span>
+            }
+
+<span class="nc" id="L123">            logger.info(&quot;Roles: {}&quot;, roles);</span>
+<span class="nc" id="L124">            logger.info(&quot;Genders: {}&quot;, genders);</span>
+
+<span class="nc" id="L126">            User user = new User()</span>
+<span class="nc" id="L127">                    .withFirstName(request.getFirstName())</span>
+<span class="nc" id="L128">                    .withLastName(request.getLastName())</span>
+<span class="nc" id="L129">                    .withBirthdate(request.getBirthdate())</span>
+<span class="nc" id="L130">                    .withDni(request.getDni())</span>
+<span class="nc" id="L131">                    .withEmail(request.getEmail())</span>
+<span class="nc" id="L132">                    .withPassword(request.getPassword())</span>
+<span class="nc" id="L133">                    .withPhone(request.getPhone())</span>
+<span class="nc" id="L134">                    .withGender(genders.iterator().next())</span>
+<span class="nc" id="L135">                    .withTypeUser(roles.iterator().next())</span>
+<span class="nc" id="L136">                    .withCreatedAt(LocalDate.now())</span>
+<span class="nc" id="L137">                    .withAddress(request.getAddress());</span>
+
+<span class="nc" id="L139">            userRepository.save(user);</span>
+<span class="nc" id="L140">            UserDto resource = enhancedMapper.map(user, UserDto.class);</span>
+<span class="nc" id="L141">            return ResponseEntity.ok(resource);</span>
+
+<span class="nc" id="L143">        } catch (Exception e) {</span>
+<span class="nc" id="L144">            logger.error(&quot;Error on register: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L145">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+        }
+    }
+
+    @Override
+    public ResponseEntity&lt;?&gt; login(LoginRequest request) {
+        try {
+<span class="nc" id="L152">            Optional&lt;User&gt; user = userRepository.findByEmailAndPassword(request.getEmail(), request.getPassword());</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (user.isPresent()) {</span>
+<span class="nc" id="L154">                UserDto resource = enhancedMapper.map(user.get(), UserDto.class);</span>
+<span class="nc" id="L155">                return ResponseEntity.ok(resource);</span>
+            } else {
+<span class="nc" id="L157">                return ResponseEntity.badRequest().body(&quot;Usuario o contraseña incorrectos&quot;);</span>
+            }
+<span class="nc" id="L159">        } catch (Exception e) {</span>
+<span class="nc" id="L160">            logger.error(&quot;Error on login: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L161">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+        }
+    }
+
+    @Override
+    public ResponseEntity&lt;?&gt; updateUser(Integer userId, UpdateRequest request){
+        try {
+<span class="nc" id="L168">            Optional&lt;User&gt; user = userRepository.findById(userId);</span>
+<span class="nc" id="L169">            user.get().setFirstName(request.getFirstName());</span>
+<span class="nc" id="L170">            user.get().setLastName(request.getLastName());</span>
+<span class="nc" id="L171">            user.get().setPhone(request.getPhone());</span>
+<span class="nc" id="L172">            user.get().setPassword(request.getPassword());</span>
+<span class="nc" id="L173">            user.get().setEmail(request.getEmail());</span>
+<span class="nc" id="L174">            user.get().setBirthdate(request.getBirthdate());</span>
+<span class="nc" id="L175">            user.get().setDni(request.getDni());</span>
+<span class="nc" id="L176">            user.get().setImageSrc(request.getImageSrc());</span>
+<span class="nc" id="L177">            user.get().setBankAccount(request.getBankAccount());</span>
+<span class="nc" id="L178">            user.get().setAddress(request.getAddress());</span>
+<span class="nc" id="L179">            UserDto resource = enhancedMapper.map(userRepository.save(user.get()), UserDto.class);</span>
+<span class="nc" id="L180">            return ResponseEntity.ok(resource);</span>
+<span class="nc" id="L181">        } catch (Exception e) {</span>
+<span class="nc" id="L182">            logger.error(&quot;Error on update: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L183">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+        }
+    }
+
+    @Override
+    public ResponseEntity&lt;?&gt; deleteUser(Integer userId){
+        try {
+<span class="nc" id="L190">            Optional&lt;User&gt; user = userRepository.findById(userId);</span>
+<span class="nc" id="L191">            userRepository.delete(user.get());</span>
+<span class="nc" id="L192">            return ResponseEntity.ok(&quot;Usuario eliminado&quot;);</span>
+<span class="nc" id="L193">        } catch (Exception e) {</span>
+<span class="nc" id="L194">            logger.error(&quot;Error on delete: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L195">            return ResponseEntity.badRequest().body(e.getMessage());</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

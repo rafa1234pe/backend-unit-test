@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.controller</a> &gt; <span class="el_source">BusinessController.java</span></div><h1>BusinessController.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.controller;
+
+import com.upc.TuCine.TuCine.dto.ActorDto;
+import com.upc.TuCine.TuCine.dto.BusinessDto;
+import com.upc.TuCine.TuCine.dto.BusinessTypeDto;
+import com.upc.TuCine.TuCine.dto.ShowtimeDto;
+import com.upc.TuCine.TuCine.dto.save.Business.BusinessSaveDto;
+import com.upc.TuCine.TuCine.service.BusinessService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = &quot;*&quot;)
+@Tag(name = &quot;Business&quot;, description = &quot;API de Businesses&quot;)
+@RequestMapping(&quot;/api/TuCine/v1&quot;)
+public class BusinessController {
+
+    @Autowired
+    private BusinessService businessService;
+
+<span class="fc" id="L32">    public BusinessController(BusinessService businessService) {</span>
+<span class="fc" id="L33">        this.businessService = businessService;</span>
+<span class="fc" id="L34">    }</span>
+    //URL: http://localhost:8080/api/TuCine/v1/businesses
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/businesses&quot;)
+    @Operation(summary = &quot;Obtener lista de todos los Businesses&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se obtuvo la lista de businesses&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = BusinessDto.class))
+                    }),
+    })
+    public ResponseEntity&lt;List&lt;BusinessDto&gt;&gt; getAllBusinesses() {
+<span class="nc" id="L48">        return new ResponseEntity&lt;&gt;(businessService.getAllBusiness(), HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/businesses/{id}
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/businesses/{id}&quot;)
+    @Operation(summary = &quot;Obtener un business por su id&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se obtuvo el business&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = BusinessDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No se encontro el business&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;BusinessDto&gt; getBusinessById(@PathVariable(value = &quot;id&quot;) Integer id) {
+<span class="nc" id="L66">        BusinessDto businessDto = businessService.getBusinessById(id);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (businessDto == null) {</span>
+<span class="nc" id="L68">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L70">        return new ResponseEntity&lt;&gt;(businessDto, HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/businesses/{id}/businessTypes
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/businesses/{id}/businessTypes&quot;)
+    @Operation(summary = &quot;Obtener un businessType mediante el id del Business&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se obtuvo el businessType&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = BusinessTypeDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No se encontro el business&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;BusinessTypeDto&gt; getBusinessTypeByBusinessId(@PathVariable(&quot;id&quot;) Integer id) {
+<span class="nc" id="L88">        BusinessTypeDto businessTypeDto = businessService.getBusinessTypeByBusinessId(id);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (businessTypeDto == null) {</span>
+<span class="nc" id="L90">            return ResponseEntity.notFound().build(); // Manejar casos en los que no se encuentre el business</span>
+        }
+<span class="nc" id="L92">        return new ResponseEntity&lt;&gt;(businessTypeDto, HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/businesses
+    //Method: POST
+    @Transactional
+    @PostMapping(&quot;/businesses&quot;)
+    @Operation(summary = &quot;Crear un business&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Se creo el business&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = BusinessDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;No se pudo crear el business&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;BusinessDto&gt; createBusiness(@RequestBody BusinessSaveDto businessSaveDto){
+<span class="nc" id="L110">        return new ResponseEntity&lt;&gt;(businessService.createBusiness(businessSaveDto), HttpStatus.CREATED);</span>
+    }
+
+    @Transactional
+    @PutMapping(&quot;/businesses/{id}&quot;)
+    @Operation(summary = &quot;Actualizar un business&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se actualizo el business&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = BusinessDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No se encontro el business&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;BusinessDto&gt; updateBusiness(@PathVariable(value = &quot;id&quot;) Integer id, @RequestBody BusinessSaveDto businessSaveDto) {
+<span class="nc" id="L126">        BusinessDto businessDto = businessService.updateBusiness(id, businessSaveDto);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (businessDto == null) {</span>
+<span class="nc" id="L128">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L130">        return new ResponseEntity&lt;&gt;(businessDto, HttpStatus.OK);</span>
+    }
+
+    @Transactional
+    @DeleteMapping(&quot;/businesses/{id}&quot;)
+    @Operation(summary = &quot;Eliminar un business&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se elimino el business&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = BusinessDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No se encontro el business&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;String&gt; deleteBusiness(@PathVariable(value = &quot;id&quot;) Integer id) {
+<span class="nc" id="L146">        return new ResponseEntity&lt;&gt;(businessService.deleteBusiness(id), HttpStatus.OK);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

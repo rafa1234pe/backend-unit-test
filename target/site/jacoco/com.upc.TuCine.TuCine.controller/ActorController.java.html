@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActorController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.controller</a> &gt; <span class="el_source">ActorController.java</span></div><h1>ActorController.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.controller;
+
+import com.upc.TuCine.TuCine.dto.ActorDto;
+import com.upc.TuCine.TuCine.dto.save.Actor.ActorSaveDto;
+import com.upc.TuCine.TuCine.service.ActorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+@RestController
+@CrossOrigin(origins = &quot;*&quot;)
+@Tag(name = &quot;Actor&quot;, description = &quot;API de Actores&quot;)
+@RequestMapping (&quot;/api/TuCine/v1&quot;)
+public class ActorController {
+
+    @Autowired
+    private ActorService actorService;
+
+<span class="fc" id="L28">    public ActorController(ActorService actorService) {</span>
+<span class="fc" id="L29">        this.actorService = actorService;</span>
+<span class="fc" id="L30">    }</span>
+
+    //URL: http://localhost:8080/api/TuCine/v1/actors
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/actors&quot;)
+    @Operation(summary = &quot;Obtener lista de todos los actores&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se obtuvo la lista de actores&quot;,
+            content = {
+                    @Content(mediaType = &quot;application/json&quot;,
+                    schema= @Schema(implementation = ActorDto.class,type = &quot;array&quot;))
+            })
+    })
+    public ResponseEntity&lt;List&lt;ActorDto&gt;&gt; getAllActors() {
+<span class="nc" id="L45">        return new ResponseEntity&lt;List&lt;ActorDto&gt;&gt;(actorService.getAllActors(), HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/actors
+    //Method: POST
+    @Transactional
+    @PostMapping(&quot;/actors&quot;)
+    @Operation(summary = &quot;Crear un actor&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;201&quot;, description = &quot;Se creó el actor&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = ActorDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;400&quot;, description = &quot;El actor no se pudo crear&quot;,
+                    content = @Content),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;ActorDto&gt; createActor(@RequestBody ActorSaveDto actorSaveDto){
+<span class="nc" id="L65">        return new ResponseEntity&lt;ActorDto&gt;(actorService.createActor(actorSaveDto), HttpStatus.CREATED);</span>
+    }
+
+    @Transactional
+    @PutMapping(&quot;/actors/{id}&quot;)
+    @Operation(summary = &quot;Actualizar un actor&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se actualizó el actor&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = ActorDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;El actor no se pudo actualizar&quot;,
+                    content = @Content),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;ActorDto&gt; updateActor(@PathVariable Integer id, @RequestBody ActorSaveDto actorSaveDto){
+<span class="nc" id="L83">        return new ResponseEntity&lt;&gt;(actorService.updateActor(id, actorSaveDto), HttpStatus.OK);</span>
+    }
+
+    @Transactional
+    @DeleteMapping(&quot;/actors/{id}&quot;)
+    @Operation(summary = &quot;Eliminar un actor&quot;)
+    @ApiResponses(value={
+            @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se eliminó el actor&quot;,
+                    content = {
+                            @Content(mediaType = &quot;application/json&quot;,
+                                    schema= @Schema(implementation = ActorDto.class))
+                    }),
+            @ApiResponse(responseCode = &quot;404&quot;, description = &quot;El actor no se pudo eliminar&quot;,
+                    content = @Content),
+            @ApiResponse(responseCode = &quot;500&quot;, description = &quot;Error interno del servidor&quot;,
+                    content = @Content)
+    })
+    public ResponseEntity&lt;String&gt; deleteActor(@PathVariable Integer id){
+<span class="nc" id="L101">        return new ResponseEntity&lt;&gt;(actorService.deleteActor(id), HttpStatus.OK);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActorServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">ActorServiceImpl.java</span></div><h1>ActorServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.ActorDto;
+
+import com.upc.TuCine.TuCine.dto.save.Actor.ActorSaveDto;
+
+import com.upc.TuCine.TuCine.dto.save.Actor.ActorSaveDto;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+
+import com.upc.TuCine.TuCine.model.Actor;
+import com.upc.TuCine.TuCine.repository.ActorRepository;
+import com.upc.TuCine.TuCine.service.ActorService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+public class ActorServiceImpl implements ActorService {
+
+    @Autowired
+    private ActorRepository actorRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L29">    public ActorServiceImpl(){</span>
+<span class="fc" id="L30">        this.modelMapper = new ModelMapper();</span>
+<span class="fc" id="L31">    }</span>
+
+    private ActorDto EntityToDto(Actor actor){
+<span class="nc" id="L34">        return modelMapper.map(actor, ActorDto.class);</span>
+    }
+
+    private Actor DtoToEntity(ActorDto actorDto){
+<span class="nc" id="L38">        return modelMapper.map(actorDto, Actor.class);</span>
+    }
+
+    @Override
+    public ActorDto createActor(ActorSaveDto actorSaveDto) {
+<span class="nc" id="L43">        ActorDto actorDto = modelMapper.map(actorSaveDto, ActorDto.class);</span>
+
+<span class="nc" id="L45">        validateActor(actorDto);</span>
+<span class="nc" id="L46">        existActorByFirstName(actorDto.getFirstName(),actorDto.getLastName());</span>
+<span class="nc" id="L47">        Actor actor = DtoToEntity(actorDto);</span>
+<span class="nc" id="L48">        return EntityToDto(actorRepository.save(actor));</span>
+    }
+
+    @Override
+    public List&lt;ActorDto&gt; getAllActors() {
+<span class="nc" id="L53">        List&lt;Actor&gt; actors = actorRepository.findAll();</span>
+<span class="nc" id="L54">        List&lt;ActorDto&gt; actorDtos = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        for (Actor actor : actors) {</span>
+<span class="nc" id="L56">            actorDtos.add(EntityToDto(actor));</span>
+<span class="nc" id="L57">        }</span>
+<span class="nc" id="L58">        return actorDtos;</span>
+    }
+
+    @Override
+    public ActorDto updateActor(Integer id, ActorSaveDto actorSaveDto) {
+<span class="nc" id="L63">        ActorDto actorDto = modelMapper.map(actorSaveDto, ActorDto.class);</span>
+<span class="nc" id="L64">        Actor actor = DtoToEntity(actorDto);</span>
+<span class="nc" id="L65">        Actor actorUpdate = actorRepository.findById(id).orElseThrow(() -&gt; new ValidationException(&quot;No existe el actor&quot;));</span>
+<span class="nc" id="L66">        actorUpdate.setFirstName(actor.getFirstName());</span>
+<span class="nc" id="L67">        actorUpdate.setLastName(actor.getLastName());</span>
+<span class="nc" id="L68">        actorUpdate.setBirthday(actor.getBirthday());</span>
+<span class="nc" id="L69">        actorUpdate.setBiography(actor.getBiography());</span>
+<span class="nc" id="L70">        actorUpdate.setProfileSrc(actor.getProfileSrc());</span>
+<span class="nc" id="L71">        return EntityToDto(actorRepository.save(actorUpdate));</span>
+    }
+
+    @Override
+    public String deleteActor(Integer id) {
+<span class="nc" id="L76">        Actor actor = actorRepository.findById(id).orElseThrow(() -&gt; new ValidationException(&quot;No existe el actor&quot;));</span>
+<span class="nc" id="L77">        actorRepository.delete(actor);</span>
+<span class="nc" id="L78">        return &quot;El actor con nombre &quot; + actor.getFirstName() + &quot; &quot; + actor.getLastName() + &quot; ha sido eliminado&quot;;</span>
+    }
+
+
+    private void validateActor(ActorDto actor) {
+<span class="nc bnc" id="L83" title="All 4 branches missed.">        if (actor.getFirstName() == null || actor.getFirstName().isEmpty()) {</span>
+<span class="nc" id="L84">            throw new ValidationException(&quot;El nombre es obligatorio&quot;);</span>
+        }
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (actor.getLastName() == null || actor.getLastName().isEmpty()) {</span>
+<span class="nc" id="L87">            throw new ValidationException(&quot;El apellido es obligatorio&quot;);</span>
+        }
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (actor.getBirthday() == null) {</span>
+<span class="nc" id="L90">            throw new ValidationException(&quot;La fecha de nacimiento es obligatoria&quot;);</span>
+        }
+<span class="nc" id="L92">    }</span>
+
+    private void existActorByFirstName(String firstName,String lastName){
+<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (actorRepository.existsByFirstNameAndLastName(firstName, lastName)) {</span>
+<span class="nc" id="L96">            throw new ValidationException(&quot;Ya existe un actor con el nombre &quot; + firstName + &quot; &quot; + lastName);</span>
+        }
+<span class="nc" id="L98">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

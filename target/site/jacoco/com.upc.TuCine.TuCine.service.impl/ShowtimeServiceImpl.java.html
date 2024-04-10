@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShowtimeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">ShowtimeServiceImpl.java</span></div><h1>ShowtimeServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.ShowtimeDto;
+import com.upc.TuCine.TuCine.repository.*;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import com.upc.TuCine.TuCine.model.*;
+import com.upc.TuCine.TuCine.service.ShowtimeService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class ShowtimeServiceImpl implements ShowtimeService {
+
+    @Autowired
+    private ShowtimeRepository showtimeRepository;
+
+    @Autowired
+    private AvailableFilmRepository availableFilmRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L28">    public ShowtimeServiceImpl() {</span>
+<span class="fc" id="L29">        this.modelMapper = new ModelMapper();</span>
+<span class="fc" id="L30">    }</span>
+
+    private ShowtimeDto EntityToDto(Showtime showtime){
+<span class="nc" id="L33">        return modelMapper.map(showtime, ShowtimeDto.class);</span>
+    }
+
+    private Showtime DtoToEntity(ShowtimeDto showtimeDto){
+<span class="nc" id="L37">        return modelMapper.map(showtimeDto, Showtime.class);</span>
+    }
+
+    @Override
+    public List&lt;ShowtimeDto&gt; getAllShowtimes() {
+<span class="nc" id="L42">        List&lt;Showtime&gt; showtimes = showtimeRepository.findAll();</span>
+<span class="nc" id="L43">        return showtimes.stream()</span>
+<span class="nc" id="L44">                .map(this::EntityToDto)</span>
+<span class="nc" id="L45">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public ShowtimeDto getShowtimeById(Integer id) {
+<span class="nc" id="L50">        Showtime showtime = showtimeRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if (showtime == null) {</span>
+<span class="nc" id="L52">            return null; // O lanzar una excepción si lo prefieres</span>
+        }
+<span class="nc" id="L54">        return EntityToDto(showtime);</span>
+    }
+
+    @Override
+    public ShowtimeDto createShowtime(ShowtimeDto showtimeDto) {
+
+<span class="nc" id="L60">        validateShowtime(showtimeDto);</span>
+
+        AvailableFilm availableFilm;
+        try {
+<span class="nc" id="L64">            availableFilm = availableFilmRepository.findById(showtimeDto.getAvailableFilm().getId()).orElse(null);</span>
+<span class="nc" id="L65">        } catch (Exception e) {</span>
+<span class="nc" id="L66">            availableFilm = null;</span>
+<span class="nc" id="L67">        }</span>
+<span class="nc" id="L68">        showtimeDto.setAvailableFilm(availableFilm);</span>
+<span class="nc" id="L69">        Showtime showtime = DtoToEntity(showtimeDto);</span>
+<span class="nc" id="L70">        Showtime createdShowtime = showtimeRepository.save(showtime);</span>
+
+<span class="nc" id="L72">        return EntityToDto(createdShowtime);</span>
+    }
+
+    @Override
+    public ShowtimeDto updateShowtime(Integer id, ShowtimeDto showtimeDto) {
+<span class="nc" id="L77">        Showtime showtimeToUpdate = showtimeRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (showtimeToUpdate == null) {</span>
+<span class="nc" id="L79">            return null; // O lanzar una excepción si lo prefieres</span>
+        }
+<span class="nc" id="L81">        validateShowtime(showtimeDto);</span>
+<span class="nc" id="L82">        existsAvailableFilmById(showtimeDto.getAvailableFilm().getId());</span>
+
+        // Actualizar los campos del Showtime existente
+<span class="nc" id="L85">        showtimeToUpdate.setAvailableFilm(showtimeDto.getAvailableFilm());</span>
+<span class="nc" id="L86">        showtimeToUpdate.setPlayDate(showtimeDto.getPlayDate());</span>
+<span class="nc" id="L87">        showtimeToUpdate.setPlayTime(showtimeDto.getPlayTime());</span>
+<span class="nc" id="L88">        showtimeToUpdate.setCapacity(showtimeDto.getCapacity());</span>
+<span class="nc" id="L89">        showtimeToUpdate.setUnitPrice(showtimeDto.getUnitPrice());</span>
+
+        // Guardar el Showtime actualizado en el repositorio
+<span class="nc" id="L92">        Showtime updatedShowtime = showtimeRepository.save(showtimeToUpdate);</span>
+
+<span class="nc" id="L94">        return EntityToDto(updatedShowtime);</span>
+    }
+
+    @Override
+    public ShowtimeDto deleteShowtime(Integer id) {
+<span class="nc" id="L99">        Showtime showtimeToDelete = showtimeRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (showtimeToDelete == null) {</span>
+<span class="nc" id="L101">            return null; // O lanzar una excepción si lo prefieres</span>
+        }
+<span class="nc" id="L103">        showtimeRepository.delete(showtimeToDelete);</span>
+<span class="nc" id="L104">        return EntityToDto(showtimeToDelete);</span>
+    }
+
+    @Override
+    public List&lt;ShowtimeDto&gt; getShowtimesByFilmAndBusiness(Integer filmId, Integer businessId) {
+        // Primero, verifica si existe una relación AvailableFilm para el Film y Business proporcionados
+<span class="nc" id="L110">        AvailableFilm availableFilm = availableFilmRepository.findByFilmIdAndBusinessId(filmId, businessId);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">        if (availableFilm == null) {</span>
+<span class="nc" id="L112">            return Collections.emptyList(); // No se encontró una relación entre Film y Business</span>
+        }
+
+        // Si se encuentra la relación, obtén todos los showtimes asociados a esa AvailableFilm
+<span class="nc" id="L116">        List&lt;Showtime&gt; showtimes = showtimeRepository.findAllByAvailableFilmId(availableFilm.getId());</span>
+<span class="nc" id="L117">        return showtimes.stream()</span>
+<span class="nc" id="L118">                .map(showtime -&gt; modelMapper.map(showtime, ShowtimeDto.class))</span>
+<span class="nc" id="L119">                .collect(Collectors.toList());</span>
+    }
+
+    private void validateShowtime(ShowtimeDto showtime) {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (showtime.getAvailableFilm() == null ) {</span>
+<span class="nc" id="L124">            throw new ValidationException(&quot;La película disponible es obligatoria&quot;);</span>
+        }
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (showtime.getPlayDate() == null) {</span>
+<span class="nc" id="L127">            throw new ValidationException(&quot;La fecha es obligatoria&quot;);</span>
+        }
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (showtime.getPlayTime() == null ) {</span>
+<span class="nc" id="L130">            throw new ValidationException(&quot;La hora es obligatoria&quot;);</span>
+        }
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (showtime.getUnitPrice() == null ) {</span>
+<span class="nc" id="L133">            throw new ValidationException(&quot;El precio es obligatorio&quot;);</span>
+        }
+<span class="nc" id="L135">    }</span>
+
+    private void existsAvailableFilmById(Integer id) {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if (!availableFilmRepository.existsById(id)) {</span>
+<span class="nc" id="L139">            throw new ValidationException(&quot;La película no existe&quot;);</span>
+        }
+<span class="nc" id="L141">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

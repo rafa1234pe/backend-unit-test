@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AvailableFilm.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.model</a> &gt; <span class="el_source">AvailableFilm.java</span></div><h1>AvailableFilm.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+<span class="nc bnc" id="L11" title="All 54 branches missed.">@Data</span>
+<span class="nc" id="L12">@Builder</span>
+<span class="fc" id="L13">@NoArgsConstructor</span>
+<span class="nc" id="L14">@AllArgsConstructor</span>
+@Entity
+@Table(name = &quot;AvailableFilm&quot;)
+public class AvailableFilm {
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+<span class="nc" id="L20">    private Integer id;</span>
+
+    @ManyToOne
+    @JoinColumn(name = &quot;business_id&quot;, nullable = false, foreignKey = @ForeignKey(name = &quot;FK_AVAILABLEFILM_BUSINESS&quot;))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+<span class="nc" id="L25">    private Business business;</span>
+
+    @ManyToOne
+    @JoinColumn(name = &quot;film_id&quot;, nullable = false, foreignKey = @ForeignKey(name = &quot;FK_AVAILABLEFILM_FILM&quot;))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+<span class="nc" id="L30">    private Film film;</span>
+
+    @Column(name = &quot;custom_notice&quot;)
+    @Size(max = 80)
+<span class="nc" id="L34">    private String customNotice;</span>
+
+    @Column(name = &quot;is_available&quot;, nullable = false)
+<span class="nc" id="L37">    private Character isAvailable;</span>
+
+    @ManyToOne
+    @JoinColumn(name = &quot;promotion_id&quot;, nullable = false, foreignKey = @ForeignKey(name = &quot;FK_AVAILABLEFILM_PROMOTION&quot;))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+<span class="nc" id="L42">    private Promotion promotion;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

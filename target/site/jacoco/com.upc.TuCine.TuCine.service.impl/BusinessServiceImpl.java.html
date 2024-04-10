@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">BusinessServiceImpl.java</span></div><h1>BusinessServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.BusinessDto;
+import com.upc.TuCine.TuCine.dto.BusinessTypeDto;
+import com.upc.TuCine.TuCine.dto.ShowtimeDto;
+
+import com.upc.TuCine.TuCine.dto.save.Business.BusinessSaveDto;
+
+import com.upc.TuCine.TuCine.dto.save.Business.BusinessSaveDto;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import com.upc.TuCine.TuCine.model.*;
+import com.upc.TuCine.TuCine.repository.BusinessRepository;
+import com.upc.TuCine.TuCine.repository.BusinessTypeRepository;
+import com.upc.TuCine.TuCine.repository.ShowtimeRepository;
+import com.upc.TuCine.TuCine.service.BusinessService;
+import com.upc.TuCine.TuCine.user.domain.model.User;
+import com.upc.TuCine.TuCine.user.persistence.UserRepository;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class BusinessServiceImpl implements BusinessService {
+
+    @Autowired
+    private BusinessRepository businessRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private BusinessTypeRepository businessTypeRepository;
+
+    @Autowired
+    private ShowtimeRepository showtimeRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L43">    BusinessServiceImpl(){</span>
+<span class="fc" id="L44">        this.modelMapper = new ModelMapper();</span>
+<span class="fc" id="L45">    }</span>
+
+    public BusinessDto EntityToDto(Business business){
+<span class="nc" id="L48">        return modelMapper.map(business, BusinessDto.class);</span>
+    }
+
+    public Business DtoToEntity(BusinessDto businessDto){
+<span class="nc" id="L52">        return modelMapper.map(businessDto, Business.class);</span>
+    }
+
+    public BusinessTypeDto convertBusinessTypeToDto(BusinessType businessType){
+<span class="nc" id="L56">        return modelMapper.map(businessType, BusinessTypeDto.class);</span>
+    }
+
+    @Override
+    public BusinessDto createBusiness(BusinessSaveDto businessSaveDto) {
+
+
+<span class="nc" id="L63">        BusinessDto businessDto = modelMapper.map(businessSaveDto, BusinessDto.class);</span>
+
+<span class="nc" id="L65">        validateBusiness(businessDto);</span>
+<span class="nc" id="L66">        existsByBusinessName(businessDto.getName());</span>
+<span class="nc" id="L67">        existsByBusinessRuc(businessDto.getRuc());</span>
+
+<span class="nc" id="L69">        User user = userRepository.findById(businessDto.getUser().getId()).orElse(null);</span>
+<span class="nc" id="L70">        businessDto.setUser(user);</span>
+
+
+<span class="nc" id="L73">        BusinessType businessType = businessTypeRepository.findById(businessDto.getBusinessType().getId()).orElse(null);</span>
+<span class="nc" id="L74">        businessDto.setBusinessType(businessType);</span>
+
+
+<span class="nc" id="L77">        Business business = DtoToEntity(businessDto);</span>
+<span class="nc" id="L78">        return EntityToDto(businessRepository.save(business));</span>
+    }
+
+    @Override
+    public List&lt;BusinessDto&gt; getAllBusiness() {
+<span class="nc" id="L83">        List&lt;Business&gt; businesses = businessRepository.findAll();</span>
+<span class="nc" id="L84">        return businesses.stream()</span>
+<span class="nc" id="L85">                .map(this::EntityToDto)</span>
+<span class="nc" id="L86">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public BusinessDto getBusinessById(Integer id) {
+<span class="nc" id="L91">        Business business = businessRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (business == null) {</span>
+<span class="nc" id="L93">            return null;</span>
+        }
+<span class="nc" id="L95">        return EntityToDto(business);</span>
+    }
+
+    @Override
+    public BusinessDto updateBusiness(Integer id, BusinessSaveDto businessSaveDto) {
+<span class="nc" id="L100">        BusinessDto businessDto = modelMapper.map(businessSaveDto, BusinessDto.class);</span>
+
+<span class="nc" id="L102">        validateBusiness(businessDto);</span>
+
+<span class="nc" id="L104">        Business business = businessRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        if (business == null) {</span>
+<span class="nc" id="L106">            return null;</span>
+        }
+<span class="nc" id="L108">        businessDto.setId(id);</span>
+
+<span class="nc" id="L110">        businessDto.setUser(userRepository.findById(businessSaveDto.getUser().getId()).orElse(null));</span>
+
+<span class="nc" id="L112">        businessDto.setBusinessType(businessTypeRepository.findById(businessSaveDto.getBusinessType().getId()).orElse(null));</span>
+<span class="nc" id="L113">        business = DtoToEntity(businessDto);</span>
+<span class="nc" id="L114">        return EntityToDto(businessRepository.save(business));</span>
+    }
+
+    @Override
+    public String deleteBusiness(Integer id) {
+<span class="nc" id="L119">        Business business = businessRepository.findById(id).orElseThrow(() -&gt; new ValidationException(&quot;No existe el negocio&quot;));</span>
+<span class="nc" id="L120">        businessRepository.delete(business);</span>
+<span class="nc" id="L121">        return &quot;El negocio con nombre &quot; + business.getName() + &quot; ha sido eliminado&quot;;</span>
+    }
+
+    @Override
+    public BusinessTypeDto getBusinessTypeByBusinessId(Integer id) {
+<span class="nc" id="L126">        Business business = businessRepository.getById(id);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (business == null) {</span>
+<span class="nc" id="L128">            return null;</span>
+        }
+<span class="nc" id="L130">        BusinessType businessType = business.getBusinessType();</span>
+<span class="nc" id="L131">        return convertBusinessTypeToDto(businessType);</span>
+    }
+
+
+
+    public void validateBusiness(BusinessDto business) {
+<span class="nc bnc" id="L137" title="All 4 branches missed.">        if (business.getName() == null || business.getName().isEmpty()) {</span>
+<span class="nc" id="L138">            throw new ValidationException(&quot;El nombre de negocio es obligatorio&quot;);</span>
+        }
+<span class="nc bnc" id="L140" title="All 4 branches missed.">        if(business.getSocialReason()==null || business.getSocialReason().isEmpty()){</span>
+<span class="nc" id="L141">            throw new ValidationException(&quot;La razón social es obligatoria&quot;);</span>
+        }
+<span class="nc bnc" id="L143" title="All 4 branches missed.">        if (business.getRuc() == null || business.getRuc().isEmpty()) {</span>
+<span class="nc" id="L144">            throw new ValidationException(&quot;El RUC es obligatorio&quot;);</span>
+        }
+<span class="nc bnc" id="L146" title="All 4 branches missed.">        if (business.getPhone() == null || business.getPhone().isEmpty()) {</span>
+<span class="nc" id="L147">            throw new ValidationException(&quot;El teléfono es obligatorio&quot;);</span>
+        }
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        if(business.getBusinessType()==null){</span>
+<span class="nc" id="L150">            throw new ValidationException(&quot;El tipo de negocio es obligatorio&quot;);</span>
+        }
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if(business.getUser()==null){</span>
+<span class="nc" id="L153">            throw new ValidationException(&quot;El dueño es obligatorio&quot;);</span>
+        }
+<span class="nc" id="L155">    }</span>
+
+    public void existsByBusinessName(String businessName) {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (businessRepository.existsBusinessByName(businessName)) {</span>
+<span class="nc" id="L159">            throw new ValidationException(&quot;El nombre de negocio ya existe&quot;);</span>
+        }
+<span class="nc" id="L161">    }</span>
+    public void existsByBusinessRuc(String businessRuc) {
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (businessRepository.existsBusinessByRuc(businessRuc)) {</span>
+<span class="nc" id="L164">            throw new ValidationException(&quot;Un Business con ese RUC ya existe&quot;);</span>
+        }
+<span class="nc" id="L166">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

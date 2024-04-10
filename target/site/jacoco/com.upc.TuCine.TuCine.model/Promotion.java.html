@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Promotion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.model</a> &gt; <span class="el_source">Promotion.java</span></div><h1>Promotion.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.model;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+<span class="nc bnc" id="L14" title="All 70 branches missed.">@Data</span>
+<span class="nc" id="L15">@Builder</span>
+<span class="fc" id="L16">@NoArgsConstructor</span>
+<span class="nc" id="L17">@AllArgsConstructor</span>
+@Entity
+@Table(name = &quot;Promotion&quot;)
+public class Promotion {
+
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+<span class="nc" id="L24">    private Integer id;</span>
+
+    @Column(name = &quot;title&quot;, nullable = false)
+<span class="nc" id="L27">    private String title;</span>
+
+    @Column(name = &quot;start_date&quot;, nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;dd-MM-yyyy&quot;)
+<span class="nc" id="L31">    private LocalDate startDate;</span>
+
+    @Column(name = &quot;end_date&quot;, nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = &quot;dd-MM-yyyy&quot;)
+<span class="nc" id="L35">    private LocalDate endDate;</span>
+
+    @Column(name = &quot;description&quot;, nullable = false)
+<span class="nc" id="L38">    private String description;</span>
+
+    @Column(name = &quot;image_src&quot;, nullable = false)
+<span class="nc" id="L41">    private String imageSrc;</span>
+
+    @Column(name = &quot;discount&quot;, nullable = false)
+<span class="nc" id="L44">    private Float discount;</span>
+
+    @ManyToOne
+    @JoinColumn(name = &quot;business_id&quot;, nullable = false, foreignKey = @ForeignKey(name = &quot;FK_PROMOTION_BUSINESS&quot;))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+<span class="nc" id="L49">    private Business business;</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

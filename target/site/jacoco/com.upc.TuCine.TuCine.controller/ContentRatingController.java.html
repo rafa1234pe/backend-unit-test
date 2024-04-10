@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ContentRatingController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.controller</a> &gt; <span class="el_source">ContentRatingController.java</span></div><h1>ContentRatingController.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.controller;
+
+
+import com.upc.TuCine.TuCine.dto.CategoryDto;
+import com.upc.TuCine.TuCine.dto.ContentRatingDto;
+import com.upc.TuCine.TuCine.dto.save.ContentRating.ContentRatingSaveDto;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+
+import com.upc.TuCine.TuCine.dto.save.ContentRating.ContentRatingSaveDto;
+
+import com.upc.TuCine.TuCine.service.ContentRatingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = &quot;*&quot;)
+@Tag(name = &quot;ContentRating&quot;, description = &quot;API de ContentRating&quot;)
+@RequestMapping(&quot;/api/TuCine/v1&quot;)
+
+public class ContentRatingController {
+
+    @Autowired
+    private ContentRatingService contentRatingService;
+
+<span class="fc" id="L36">    public ContentRatingController(ContentRatingService contentRatingService) {</span>
+<span class="fc" id="L37">        this.contentRatingService = contentRatingService;</span>
+<span class="fc" id="L38">    }</span>
+
+    //URL: http://localhost:8080/api/TuCine/v1/contentRatings
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/contentRatings&quot;)
+    @Operation(summary = &quot;Obtener todos los clasificaciones de contenido que existen para las películas&quot;)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = &quot;200&quot;,
+                    description = &quot;Se obtuvo la lista de clasificaciones de contenido&quot;,
+                    content = {
+                            @Content(
+                                    mediaType = &quot;application/json&quot;,
+                                    schema = @Schema(implementation = ContentRatingDto.class, type = &quot;array&quot;)
+                            )
+                    }
+            ),
+
+    })
+    public ResponseEntity&lt;List&lt;ContentRatingDto&gt;&gt; getAllContentRatings() {
+<span class="nc" id="L59">        return new ResponseEntity&lt;&gt;(contentRatingService.getAllContentRatings(), HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/contentRatings/{id}
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/contentRatings/{id}&quot;)
+    @Operation(summary = &quot;Obtener una clasificación de contenido por su id&quot;)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = &quot;200&quot;,
+                    description = &quot;Se obtuvo la clasificación de contenido&quot;,
+                    content = {
+                            @Content(
+                                    mediaType = &quot;application/json&quot;,
+                                    schema = @Schema(implementation = ContentRatingDto.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = &quot;404&quot;,
+                    description = &quot;No se encontró la clasificación de contenido&quot;,
+                    content = @Content
+            )
+    })
+    public ResponseEntity&lt;ContentRatingDto&gt; getContentRatingById(@PathVariable(&quot;id&quot;) Integer id) {
+<span class="nc" id="L85">        return new ResponseEntity&lt;ContentRatingDto&gt;(contentRatingService.getContentRatingById(id), HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/contentRatings
+    //Method: POST
+    @Transactional
+    @PostMapping(&quot;/contentRatings&quot;)
+    @Operation(summary = &quot;Crear una clasificación de contenido&quot;)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = &quot;201&quot;,
+                    description = &quot;Se creó la clasificación de contenido&quot;,
+                    content = {
+                            @Content(
+                                    mediaType = &quot;application/json&quot;,
+                                    schema = @Schema(implementation = ContentRatingDto.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = &quot;400&quot;,
+                    description = &quot;No se pudo crear la clasificación de contenido&quot;,
+                    content = @Content
+            )
+    })
+    public ResponseEntity&lt;ContentRatingDto&gt; createContentRating(@RequestBody ContentRatingSaveDto contentRatingSaveDto){
+<span class="nc" id="L111">        return new ResponseEntity&lt;ContentRatingDto&gt;(contentRatingService.createContentRating(contentRatingSaveDto), HttpStatus.CREATED);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/contentRatings/{id}
+    //Method: PUT
+    @Transactional
+    @PutMapping(&quot;/contentRatings/{id}&quot;)
+    @Operation(summary = &quot;Actualizar una clasificación de contenido por su id&quot;)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = &quot;200&quot;,
+                    description = &quot;Se actualizó la clasificación de contenido&quot;,
+                    content = {
+                            @Content(
+                                    mediaType = &quot;application/json&quot;,
+                                    schema = @Schema(implementation = ContentRatingDto.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = &quot;404&quot;,
+                    description = &quot;No se encontró la clasificación de contenido&quot;,
+                    content = @Content
+            )
+    })
+    public ResponseEntity&lt;ContentRatingDto&gt; updateContentRating(@PathVariable(&quot;id&quot;) Integer id, @RequestBody ContentRatingSaveDto contentRatingSaveDto){
+<span class="nc" id="L137">        return new ResponseEntity&lt;ContentRatingDto&gt;(contentRatingService.updateContentRating(id, contentRatingSaveDto), HttpStatus.OK);</span>
+    }
+
+    @Transactional
+    @DeleteMapping(&quot;/contentRatings/{id}&quot;)
+    @Operation(summary = &quot;Eliminar una clasificación de contenido por su id&quot;)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = &quot;200&quot;,
+                    description = &quot;Se eliminó la clasificación de contenido&quot;,
+                    content = {
+                            @Content(
+                                    mediaType = &quot;application/json&quot;,
+                                    schema = @Schema(implementation = ContentRatingDto.class)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = &quot;404&quot;,
+                    description = &quot;No se encontró la clasificación de contenido&quot;,
+                    content = @Content
+            )
+    })
+    public ResponseEntity&lt;String&gt; deleteContentRating(@PathVariable Integer id){
+<span class="nc" id="L161">        return new ResponseEntity&lt;&gt;(contentRatingService.deleteContentRating(id), HttpStatus.OK);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AvailableFilmServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">AvailableFilmServiceImpl.java</span></div><h1>AvailableFilmServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.AvailableFilmDto;
+import com.upc.TuCine.TuCine.dto.BusinessDto;
+import com.upc.TuCine.TuCine.model.AvailableFilm;
+import com.upc.TuCine.TuCine.model.Business;
+import com.upc.TuCine.TuCine.model.Film;
+import com.upc.TuCine.TuCine.model.Promotion;
+import com.upc.TuCine.TuCine.repository.AvailableFilmRepository;
+import com.upc.TuCine.TuCine.repository.BusinessRepository;
+import com.upc.TuCine.TuCine.repository.FilmRepository;
+import com.upc.TuCine.TuCine.repository.PromotionRepository;
+import com.upc.TuCine.TuCine.service.AvailableFilmService;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+@Service
+public class AvailableFilmServiceImpl implements AvailableFilmService {
+
+    @Autowired
+    private AvailableFilmRepository availableFilmRepository;
+    @Autowired
+    private BusinessRepository businessRepository;
+    @Autowired
+    private FilmRepository filmRepository;
+    @Autowired
+    private PromotionRepository promotionRepository;
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L35">    AvailableFilmServiceImpl() { this.modelMapper = new ModelMapper(); }</span>
+
+    private AvailableFilmDto EntityToDto(AvailableFilm availableFilm) {
+<span class="nc" id="L38">        return modelMapper.map(availableFilm, AvailableFilmDto.class);</span>
+    }
+
+    private AvailableFilm DtoToEntity(AvailableFilmDto availableFilmDto) {
+<span class="nc" id="L42">        return modelMapper.map(availableFilmDto, AvailableFilm.class);</span>
+    }
+
+    @Override
+    public List&lt;AvailableFilmDto&gt; getAllAvailableFilms() {
+<span class="nc" id="L47">        List&lt;AvailableFilm&gt; availableFilms = availableFilmRepository.findAll();</span>
+<span class="nc" id="L48">        return availableFilms.stream()</span>
+<span class="nc" id="L49">                .map(this::EntityToDto)</span>
+<span class="nc" id="L50">                .collect(Collectors.toList());</span>
+    }
+
+    @Override
+    public AvailableFilmDto createAvailableFilm(AvailableFilmDto availableFilmDto) {
+
+<span class="nc" id="L56">        validateAvailableFilm(availableFilmDto);</span>
+<span class="nc" id="L57">        existsBusinessById(availableFilmDto.getBusiness().getId());</span>
+<span class="nc" id="L58">        existsFilmById(availableFilmDto.getFilm().getId());</span>
+<span class="nc" id="L59">        existsPromotionById(availableFilmDto.getPromotion().getId());</span>
+
+<span class="nc" id="L61">        Business business = businessRepository.findById(availableFilmDto.getBusiness().getId()).orElse(null);</span>
+<span class="nc" id="L62">        availableFilmDto.setBusiness(business);</span>
+
+<span class="nc" id="L64">        Film film = filmRepository.findById(availableFilmDto.getFilm().getId()).orElse(null);</span>
+<span class="nc" id="L65">        availableFilmDto.setFilm(film);</span>
+
+<span class="nc" id="L67">        Promotion promotion = promotionRepository.findById(availableFilmDto.getPromotion().getId()).orElse(null);</span>
+<span class="nc" id="L68">        availableFilmDto.setPromotion(promotion);</span>
+
+<span class="nc" id="L70">        AvailableFilm availableFilm = DtoToEntity(availableFilmDto);</span>
+<span class="nc" id="L71">        AvailableFilm createdAvailableFilm = availableFilmRepository.save(availableFilm);</span>
+<span class="nc" id="L72">        return EntityToDto(createdAvailableFilm);</span>
+    }
+
+    @Override
+    public AvailableFilmDto updateAvailableFilm(Integer id, AvailableFilmDto availableFilmDto) {
+<span class="nc" id="L77">        AvailableFilm availableFilmToUpdate = availableFilmRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (availableFilmToUpdate == null) {</span>
+<span class="nc" id="L79">            return null;</span>
+        }
+
+<span class="nc" id="L82">        validateAvailableFilm(availableFilmDto);</span>
+<span class="nc" id="L83">        existsBusinessById(availableFilmDto.getBusiness().getId());</span>
+<span class="nc" id="L84">        existsFilmById(availableFilmDto.getFilm().getId());</span>
+<span class="nc" id="L85">        existsPromotionById(availableFilmDto.getPromotion().getId());</span>
+
+<span class="nc" id="L87">        Business business = businessRepository.findById(availableFilmDto.getBusiness().getId()).orElse(null);</span>
+<span class="nc" id="L88">        availableFilmDto.setBusiness(business);</span>
+
+<span class="nc" id="L90">        Film film = filmRepository.findById(availableFilmDto.getFilm().getId()).orElse(null);</span>
+<span class="nc" id="L91">        availableFilmDto.setFilm(film);</span>
+
+<span class="nc" id="L93">        Promotion promotion = promotionRepository.findById(availableFilmDto.getPromotion().getId()).orElse(null);</span>
+<span class="nc" id="L94">        availableFilmDto.setPromotion(promotion);</span>
+
+<span class="nc" id="L96">        availableFilmToUpdate.setBusiness(availableFilmDto.getBusiness());</span>
+<span class="nc" id="L97">        availableFilmToUpdate.setFilm(availableFilmDto.getFilm());</span>
+<span class="nc" id="L98">        availableFilmToUpdate.setCustomNotice(availableFilmDto.getCustomNotice());</span>
+<span class="nc" id="L99">        availableFilmToUpdate.setIsAvailable(availableFilmDto.getIsAvailable());</span>
+<span class="nc" id="L100">        availableFilmToUpdate.setPromotion(availableFilmDto.getPromotion());</span>
+
+<span class="nc" id="L102">        AvailableFilm updatedAvailableFilm = availableFilmRepository.save(availableFilmToUpdate);</span>
+<span class="nc" id="L103">        return EntityToDto(updatedAvailableFilm);</span>
+    }
+
+    @Override
+    public AvailableFilmDto deleteAvailableFilm(Integer id) {
+<span class="nc" id="L108">        AvailableFilm availableFilmToDelete = availableFilmRepository.findById(Integer.valueOf(id)).orElse(null);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (availableFilmToDelete == null) {</span>
+<span class="nc" id="L110">            return null;</span>
+        }
+<span class="nc" id="L112">        availableFilmRepository.delete(availableFilmToDelete);</span>
+<span class="nc" id="L113">        return EntityToDto(availableFilmToDelete);</span>
+    }
+
+    @Override
+    public List&lt;BusinessDto&gt; getBusinessesByFilmId(Integer filmId) {
+<span class="nc" id="L118">        List&lt;AvailableFilm&gt; availableFilms = availableFilmRepository.findAllByFilmId(filmId);</span>
+<span class="nc" id="L119">        return availableFilms.stream()</span>
+<span class="nc" id="L120">                .map(availableFilm -&gt; modelMapper.map(availableFilm.getBusiness(), BusinessDto.class))</span>
+<span class="nc" id="L121">                .collect(Collectors.toList());</span>
+    }
+
+    private void validateAvailableFilm(AvailableFilmDto availableFilmDto) {
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        if (availableFilmDto.getBusiness() == null) {</span>
+<span class="nc" id="L126">            throw new ValidationException(&quot;Business id es requerido&quot;);</span>
+        }
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (availableFilmDto.getFilm() == null) {</span>
+<span class="nc" id="L129">            throw new ValidationException(&quot;Film id es requerido&quot;);</span>
+        }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (availableFilmDto.getIsAvailable() == null) {</span>
+<span class="nc" id="L132">            throw new ValidationException(&quot;isAvailable es requerido&quot;);</span>
+        }
+<span class="nc bnc" id="L134" title="All 2 branches missed.">        if (availableFilmDto.getPromotion() == null) {</span>
+<span class="nc" id="L135">            throw new ValidationException(&quot;Promotion id es requerido&quot;);</span>
+        }
+<span class="nc" id="L137">    }</span>
+
+    private void existsBusinessById(Integer id) {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (!businessRepository.existsById(id)) {</span>
+<span class="nc" id="L141">            throw new ValidationException(&quot;Business id not found&quot;);</span>
+        }
+<span class="nc" id="L143">    }</span>
+
+    private void existsFilmById(Integer id) {
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (!filmRepository.existsById(id)) {</span>
+<span class="nc" id="L147">            throw new ValidationException(&quot;Film id not found&quot;);</span>
+        }
+<span class="nc" id="L149">    }</span>
+
+    private void existsPromotionById(Integer id) {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (!promotionRepository.existsById(id)) {</span>
+<span class="nc" id="L153">            throw new ValidationException(&quot;Promotion id not found&quot;);</span>
+        }
+<span class="nc" id="L155">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

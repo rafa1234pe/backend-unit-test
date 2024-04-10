@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.controller</a> &gt; <span class="el_source">TicketController.java</span></div><h1>TicketController.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.controller;
+
+import com.upc.TuCine.TuCine.dto.ShowtimeDto;
+import com.upc.TuCine.TuCine.dto.TicketDto;
+import com.upc.TuCine.TuCine.dto.save.Ticket.TicketSaveDto;
+import com.upc.TuCine.TuCine.service.TicketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = &quot;*&quot;)
+@Tag(name = &quot;Ticket&quot;, description = &quot;API de Tickets&quot;)
+@RequestMapping(&quot;/api/TuCine/v1&quot;)
+public class TicketController {
+
+    @Autowired
+    private TicketService ticketService;
+
+<span class="fc" id="L30">    public TicketController(TicketService ticketService) {</span>
+<span class="fc" id="L31">        this.ticketService = ticketService;</span>
+<span class="fc" id="L32">    }</span>
+
+    //URL: http://localhost:8080/api/TuCine/v1/tickets
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/tickets&quot;)
+    @Operation(summary = &quot;Obtener toda la lista de tickets&quot;)
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = &quot;200&quot;,
+                    description = &quot;Se obtuvo la lista de tickets&quot;,
+                    content = {
+                            @Content(
+                                    mediaType = &quot;application/json&quot;,
+                                    schema = @Schema(implementation = TicketDto.class,type = &quot;array&quot;)
+                            )
+                    }
+            ),
+            @ApiResponse(
+                    responseCode = &quot;404&quot;,
+                    description = &quot;No se encontraron los tickets&quot;,
+                    content = @Content
+            )
+    })
+    public ResponseEntity&lt;List&lt;TicketDto&gt;&gt; getAllTickets() {
+<span class="nc" id="L57">        return new ResponseEntity&lt;&gt;(ticketService.getAllTickets(), HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/tickets
+    //Method: POST
+    @Transactional
+    @PostMapping(&quot;/tickets&quot;)
+    @Operation(summary = &quot;Crear un nuevo ticket&quot;)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = &quot;201&quot;,
+                            description = &quot;Se creó el ticket&quot;,
+                            content = {
+                                    @Content(
+                                            mediaType = &quot;application/json&quot;,
+                                            schema = @Schema(implementation = TicketDto.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = &quot;400&quot;,
+                            description = &quot;No se pudo crear el ticket&quot;,
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity&lt;TicketDto&gt; createTicket(@RequestBody TicketSaveDto ticketSaveDto){
+<span class="nc" id="L85">        TicketDto createdTicketDto= ticketService.createTicket(ticketSaveDto);</span>
+<span class="nc" id="L86">        return new ResponseEntity&lt;&gt;(createdTicketDto, HttpStatus.CREATED);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/tickets/1
+    //Method: PUT
+    @Transactional
+    @PutMapping(&quot;/tickets/{id}&quot;)
+    @Operation(summary = &quot;Actualizar ticket&quot;)
+    public ResponseEntity&lt;TicketDto&gt; updateTicket(@PathVariable Integer id, @RequestBody TicketSaveDto ticketSaveDto){
+<span class="nc" id="L95">        TicketDto updatedTicketDto = ticketService.updateTicket(id, ticketSaveDto);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if (updatedTicketDto == null) {</span>
+<span class="nc" id="L97">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L99">        return new ResponseEntity&lt;&gt;(updatedTicketDto,HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/tickets/1
+    //Method: DELETE
+    @Transactional
+    @DeleteMapping(&quot;/tickets/{id}&quot;)
+    @Operation(summary = &quot;Borrar ticket mediante su id&quot;)
+    public ResponseEntity&lt;TicketDto&gt; deleteTicket(@PathVariable Integer id){
+<span class="nc" id="L108">        TicketDto deletedTicketDto = ticketService.deleteTicket(id);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (deletedTicketDto == null) {</span>
+<span class="nc" id="L110">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L112">        return new ResponseEntity&lt;&gt;(deletedTicketDto,HttpStatus.OK);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

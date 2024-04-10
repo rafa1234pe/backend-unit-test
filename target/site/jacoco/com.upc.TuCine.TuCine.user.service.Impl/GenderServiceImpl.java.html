@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GenderServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.user.service.Impl</a> &gt; <span class="el_source">GenderServiceImpl.java</span></div><h1>GenderServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.user.service.Impl;
+
+import com.upc.TuCine.TuCine.shared.mapping.EnhancedModelMapper;
+import com.upc.TuCine.TuCine.user.domain.enumeration.Genders;
+import com.upc.TuCine.TuCine.user.domain.model.Gender;
+import com.upc.TuCine.TuCine.user.mapping.GenderMapper;
+import com.upc.TuCine.TuCine.user.persistence.GenderRepository;
+import com.upc.TuCine.TuCine.user.resource.GenderDto;
+import com.upc.TuCine.TuCine.user.service.GenderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
+
+@Service
+public class GenderServiceImpl implements GenderService {
+    @Autowired
+    private GenderRepository genderRepository;
+
+    @Autowired
+    private EnhancedModelMapper enhancedMapper;
+    private GenderMapper mapper;
+
+<span class="fc" id="L25">    private static String[] DEFAULT_GENDERS = { &quot;MALE&quot;, &quot;FEMALE&quot;, &quot;OTHER&quot; };</span>
+
+<span class="fc" id="L27">    GenderServiceImpl(GenderMapper genderMapper) {</span>
+<span class="fc" id="L28">        this.mapper = genderMapper;</span>
+<span class="fc" id="L29">    }</span>
+
+    @Override
+    public List&lt;GenderDto&gt; getAllGenders() {
+<span class="nc" id="L33">        return mapper.toResourceList(genderRepository.findAll());</span>
+    }
+
+    @Override
+    public void seed() {
+<span class="fc" id="L38">        Arrays.stream(DEFAULT_GENDERS).forEach(name -&gt; {</span>
+<span class="fc" id="L39">            Genders genderName = Genders.valueOf(name);</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            if (!genderRepository.existsByName(genderName)) {</span>
+<span class="nc" id="L41">                genderRepository.save(new Gender().withName(genderName));</span>
+
+            }
+<span class="fc" id="L44">        });</span>
+<span class="fc" id="L45">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

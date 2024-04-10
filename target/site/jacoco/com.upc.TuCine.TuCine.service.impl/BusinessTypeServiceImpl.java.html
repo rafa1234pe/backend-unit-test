@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BusinessTypeServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">BusinessTypeServiceImpl.java</span></div><h1>BusinessTypeServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.BusinessTypeDto;
+import com.upc.TuCine.TuCine.dto.save.BusinessType.BusinessTypeDtoSave;
+import com.upc.TuCine.TuCine.dto.save.BusinessType.BusinessTypeDtoSave;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import com.upc.TuCine.TuCine.model.BusinessType;
+import com.upc.TuCine.TuCine.repository.BusinessTypeRepository;
+import com.upc.TuCine.TuCine.service.BusinessTypeService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class BusinessTypeServiceImpl implements BusinessTypeService {
+
+    @Autowired
+    private BusinessTypeRepository businessTypeRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L26">    BusinessTypeServiceImpl(){</span>
+<span class="fc" id="L27">        this.modelMapper = new ModelMapper();</span>
+<span class="fc" id="L28">    }</span>
+
+    public BusinessTypeDto EntityToDto(BusinessType businessType){
+<span class="nc" id="L31">        return modelMapper.map(businessType, BusinessTypeDto.class);</span>
+    }
+    public BusinessType DtoToEntity(BusinessTypeDto businessTypeDto){
+<span class="nc" id="L34">        return modelMapper.map(businessTypeDto, BusinessType.class);</span>
+    }
+    @Override
+    public List&lt;BusinessTypeDto&gt; getAllBusinessTypes() {
+<span class="nc" id="L38">        List&lt;BusinessType&gt; businessTypes = businessTypeRepository.findAll();</span>
+<span class="nc" id="L39">        return businessTypes.stream()</span>
+<span class="nc" id="L40">                .map(this::EntityToDto)</span>
+<span class="nc" id="L41">                .collect(Collectors.toList());</span>
+    }
+    @Override
+    public BusinessTypeDto getBusinessTypeById(Integer id) {
+<span class="nc" id="L45">        BusinessType businessType = businessTypeRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        if (businessType == null) {</span>
+<span class="nc" id="L47">            return null;</span>
+        }
+<span class="nc" id="L49">        return EntityToDto(businessType);</span>
+    }
+
+    @Override
+    public BusinessTypeDto createBusinessType(BusinessTypeDtoSave businessTypeDtoSave) {
+
+<span class="nc" id="L55">        BusinessTypeDto businessTypeDto = modelMapper.map(businessTypeDtoSave, BusinessTypeDto.class);</span>
+
+<span class="nc" id="L57">        validateBusinessType(businessTypeDto);</span>
+<span class="nc" id="L58">        existsBusinessTypeByName(businessTypeDto.getName());</span>
+
+<span class="nc" id="L60">        BusinessType businessType = DtoToEntity(businessTypeDto);</span>
+<span class="nc" id="L61">        return EntityToDto(businessTypeRepository.save(businessType));</span>
+    }
+    void validateBusinessType(BusinessTypeDto businessType) {
+<span class="nc bnc" id="L64" title="All 4 branches missed.">        if (businessType.getName() == null || businessType.getName().isEmpty()) {</span>
+<span class="nc" id="L65">            throw new ValidationException(&quot;El nombre del tipo de negocio no puede estar vacío&quot;);</span>
+        }
+<span class="nc" id="L67">    }</span>
+
+    void existsBusinessTypeByName(String name) {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (businessTypeRepository.existsBusinessTypeByName(name)) {</span>
+<span class="nc" id="L71">            throw new ValidationException(&quot;Ya hay un tipo de negocio que existe con este nombre&quot;);</span>
+        }
+<span class="nc" id="L73">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

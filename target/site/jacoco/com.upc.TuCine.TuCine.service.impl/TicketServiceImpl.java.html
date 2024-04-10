@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TicketServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">TicketServiceImpl.java</span></div><h1>TicketServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.TicketDto;
+import com.upc.TuCine.TuCine.dto.save.Ticket.TicketSaveDto;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import com.upc.TuCine.TuCine.model.Showtime;
+import com.upc.TuCine.TuCine.model.Ticket;
+import com.upc.TuCine.TuCine.repository.ShowtimeRepository;
+import com.upc.TuCine.TuCine.repository.TicketRepository;
+import com.upc.TuCine.TuCine.service.TicketService;
+import com.upc.TuCine.TuCine.user.domain.model.User;
+import com.upc.TuCine.TuCine.user.persistence.UserRepository;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class TicketServiceImpl implements TicketService {
+
+    @Autowired
+    private TicketRepository ticketRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ShowtimeRepository showtimeRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L36">    public TicketServiceImpl() {</span>
+<span class="fc" id="L37">        this.modelMapper = new ModelMapper();</span>
+<span class="fc" id="L38">    }</span>
+
+    private TicketDto EntityToDto(Ticket ticket){
+<span class="nc" id="L41">        return modelMapper.map(ticket, TicketDto.class);</span>
+    }
+
+    private Ticket DtoToEntity(TicketDto ticketDto){
+<span class="nc" id="L45">        return modelMapper.map(ticketDto, Ticket.class);</span>
+    }
+    @Override
+    public List&lt;TicketDto&gt; getAllTickets() {
+<span class="nc" id="L49">        List&lt;Ticket&gt; tickets = ticketRepository.findAll();</span>
+<span class="nc" id="L50">        return tickets.stream()</span>
+<span class="nc" id="L51">                .map(this::EntityToDto)</span>
+<span class="nc" id="L52">                .collect(Collectors.toList());</span>
+    }
+    @Override
+    public TicketDto createTicket(TicketSaveDto ticketSaveDto) {
+
+<span class="nc" id="L57">        TicketDto ticketDto = modelMapper.map(ticketSaveDto, TicketDto.class);</span>
+
+<span class="nc" id="L59">        validateTicket(ticketDto);</span>
+<span class="nc" id="L60">        existsUserById(ticketDto.getUser().getId());</span>
+<span class="nc" id="L61">        existsShowtimeById(ticketDto.getShowtime().getId());</span>
+
+<span class="nc" id="L63">        User user = userRepository.findById(ticketDto.getUser().getId()).orElse(null);</span>
+<span class="nc" id="L64">        ticketDto.setUser(user);</span>
+
+<span class="nc" id="L66">        Showtime showtime = showtimeRepository.findById(ticketDto.getShowtime().getId()).orElse(null);</span>
+<span class="nc" id="L67">        ticketDto.setShowtime(showtime);</span>
+
+<span class="nc" id="L69">        ticketDto.setStatus(&quot;Activo&quot;);</span>
+<span class="nc" id="L70">        ticketDto.setDateEmition(LocalDate.now());</span>
+
+<span class="nc" id="L72">        Ticket ticket = DtoToEntity(ticketDto);</span>
+<span class="nc" id="L73">        Ticket createdTicket = ticketRepository.save(ticket);</span>
+<span class="nc" id="L74">        return EntityToDto(createdTicket);</span>
+    }
+
+    @Override
+    public TicketDto updateTicket(Integer id, TicketSaveDto ticketSaveDto) {
+
+<span class="nc" id="L80">        Ticket ticketToUpdate = ticketRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (ticketToUpdate == null) {</span>
+<span class="nc" id="L82">            return null; // O lanzar una excepción si lo prefieres</span>
+        }
+
+<span class="nc" id="L85">        TicketDto ticketDto = modelMapper.map(ticketSaveDto, TicketDto.class);</span>
+
+<span class="nc" id="L87">        validateTicket(ticketDto);</span>
+
+<span class="nc" id="L89">        User user = userRepository.findById(ticketDto.getUser().getId()).orElse(null);</span>
+<span class="nc" id="L90">        ticketDto.setUser(user);</span>
+
+<span class="nc" id="L92">        Showtime showtime = showtimeRepository.findById(ticketDto.getShowtime().getId()).orElse(null);</span>
+<span class="nc" id="L93">        ticketDto.setShowtime(showtime);</span>
+
+
+        // Actualizar los campos del ticket existente
+<span class="nc" id="L97">        ticketToUpdate.setUser(ticketDto.getUser());</span>
+<span class="nc" id="L98">        ticketToUpdate.setShowtime(ticketDto.getShowtime());</span>
+<span class="nc" id="L99">        ticketToUpdate.setNumberSeats(ticketDto.getNumberSeats());</span>
+<span class="nc" id="L100">        ticketToUpdate.setTotalPrice(ticketDto.getTotalPrice());</span>
+
+<span class="nc" id="L102">        validateTicket(ticketDto);</span>
+<span class="nc" id="L103">        existsUserById(ticketDto.getUser().getId());</span>
+<span class="nc" id="L104">        existsShowtimeById(ticketDto.getShowtime().getId());</span>
+
+<span class="nc" id="L106">        Ticket updatedTicket = ticketRepository.save(ticketToUpdate);</span>
+<span class="nc" id="L107">        return EntityToDto(updatedTicket);</span>
+    }
+
+    @Override
+    public TicketDto deleteTicket(Integer id) {
+<span class="nc" id="L112">        Ticket ticketToDelete = ticketRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">        if (ticketToDelete == null) {</span>
+<span class="nc" id="L114">            return null; // O lanzar una excepción si lo prefieres</span>
+        }
+<span class="nc" id="L116">        ticketRepository.delete(ticketToDelete);</span>
+<span class="nc" id="L117">        return EntityToDto(ticketToDelete);</span>
+    }
+
+    protected static void validateTicket(TicketDto ticket) {
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        if (ticket.getUser() == null) {</span>
+<span class="fc" id="L122">            throw new ValidationException(&quot;Customer id es requerido&quot;);</span>
+        }
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (ticket.getShowtime() == null) {</span>
+<span class="fc" id="L125">            throw new ValidationException(&quot;Showtime id es requerido&quot;);</span>
+        }
+<span class="fc bfc" id="L127" title="All 4 branches covered.">        if (ticket.getNumberSeats() == null || ticket.getNumberSeats() == 0) {</span>
+<span class="fc" id="L128">            throw new ValidationException(&quot;El numero de asientos debe ser mayor a 0&quot;);</span>
+        }
+<span class="fc bfc" id="L130" title="All 4 branches covered.">        if (ticket.getTotalPrice() == null || ticket.getTotalPrice() &lt;= 0) {</span>
+<span class="fc" id="L131">            throw new ValidationException(&quot;El precio total es requerido y debe ser mayor a 0&quot;);</span>
+        }
+<span class="fc" id="L133">    }</span>
+
+    private void existsUserById(Integer id) {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (!userRepository.existsById(id)) {</span>
+<span class="nc" id="L137">            throw new ValidationException(&quot;Customer id not found&quot;);</span>
+        }
+<span class="nc" id="L139">    }</span>
+
+    private void existsShowtimeById(Integer id) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (!showtimeRepository.existsById(id)) {</span>
+<span class="nc" id="L143">            throw new ValidationException(&quot;Showtime id not found&quot;);</span>
+        }
+<span class="nc" id="L145">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

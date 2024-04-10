@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FilmServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.service.impl</a> &gt; <span class="el_source">FilmServiceImpl.java</span></div><h1>FilmServiceImpl.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.service.impl;
+
+import com.upc.TuCine.TuCine.dto.*;
+
+import com.upc.TuCine.TuCine.dto.save.Film.FilmSaveDto;
+import com.upc.TuCine.TuCine.shared.exception.ResourceNotFoundException;
+import com.upc.TuCine.TuCine.shared.exception.ValidationException;
+import com.upc.TuCine.TuCine.model.*;
+import com.upc.TuCine.TuCine.repository.*;
+import com.upc.TuCine.TuCine.service.FilmService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class FilmServiceImpl implements FilmService {
+
+    @Autowired
+    private FilmRepository filmRepository;
+    @Autowired
+    private ContentRatingRepository contentRatingRepository;
+    @Autowired
+    private ShowtimeRepository showtimeRepository;
+    @Autowired
+    private ActorRepository actorRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+<span class="fc" id="L35">    FilmServiceImpl(){</span>
+<span class="fc" id="L36">        this.modelMapper = new ModelMapper();</span>
+<span class="fc" id="L37">    }</span>
+
+    private FilmDto EntityToDto(Film film){
+<span class="nc" id="L40">        return modelMapper.map(film, FilmDto.class);</span>
+    }
+
+    private Film DtoToEntity(FilmDto filmDto){
+<span class="nc" id="L44">        return modelMapper.map(filmDto, Film.class);</span>
+    }
+
+    @Override
+    public List&lt;FilmDto&gt; getAllFilms() {
+<span class="nc" id="L49">        List&lt;Film&gt; films = filmRepository.findAll();</span>
+<span class="nc" id="L50">        return films.stream()</span>
+<span class="nc" id="L51">                .map(this::EntityToDto)</span>
+<span class="nc" id="L52">                .collect(Collectors.toList());</span>
+    }
+    @Override
+    public FilmDto getFilmById(Integer id) {
+<span class="nc" id="L56">        Film film = filmRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (film == null) {</span>
+<span class="nc" id="L58">            return null;</span>
+        }
+<span class="nc" id="L60">        return EntityToDto(film);</span>
+    }
+
+    @Override
+    public FilmDto createFilm(FilmSaveDto filmSaveDto) {
+
+<span class="nc" id="L66">        FilmDto filmDto = modelMapper.map(filmSaveDto, FilmDto.class);</span>
+
+<span class="nc" id="L68">        validateFilm(filmDto);</span>
+<span class="nc" id="L69">        existsFilmByTitle(filmDto.getTitle());</span>
+
+<span class="nc" id="L71">        ContentRating contentRating = contentRatingRepository.findById(filmDto.getContentRating().getId()).orElse(null);</span>
+<span class="nc" id="L72">        filmDto.setContentRating(contentRating);</span>
+
+<span class="nc" id="L74">        Film film = DtoToEntity(filmDto);</span>
+<span class="nc" id="L75">        return EntityToDto(filmRepository.save(film));</span>
+    }
+
+    @Override
+    public FilmDto updateFilm(Integer id, FilmSaveDto filmSaveDto) {
+<span class="nc" id="L80">        Film film = filmRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (film == null) {</span>
+<span class="nc" id="L82">            return null;</span>
+        }
+<span class="nc" id="L84">        FilmDto filmDto = modelMapper.map(filmSaveDto, FilmDto.class);</span>
+<span class="nc" id="L85">        validateFilm(filmDto);</span>
+
+<span class="nc" id="L87">        ContentRating contentRating = contentRatingRepository.findById(filmDto.getContentRating().getId()).orElse(null);</span>
+<span class="nc" id="L88">        filmDto.setContentRating(contentRating);</span>
+
+<span class="nc" id="L90">        film = DtoToEntity(filmDto);</span>
+<span class="nc" id="L91">        film.setId(id);</span>
+<span class="nc" id="L92">        return EntityToDto(filmRepository.save(film));</span>
+
+    }
+
+    @Override
+    public String deleteFilm(Integer id) {
+<span class="nc" id="L98">        Film film = filmRepository.findById(id).orElseThrow( () -&gt; new ValidationException(&quot;No existe la película&quot;));</span>
+<span class="nc" id="L99">        filmRepository.delete(film);</span>
+<span class="nc" id="L100">        return &quot;La película con título &quot; + film.getTitle() + &quot; ha sido eliminada&quot;;</span>
+    }
+
+    @Override
+    public ContentRatingDto getContentRatingByFilmId(Integer id) {
+<span class="nc" id="L105">        Film film = filmRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (film == null) {</span>
+<span class="nc" id="L107">            return null;</span>
+        }
+<span class="nc" id="L109">        ContentRating contentRating = film.getContentRating();</span>
+<span class="nc" id="L110">        return modelMapper.map(contentRating, ContentRatingDto.class);</span>
+    }
+
+    @Override
+    public List&lt;CategoryDto&gt; getAllCategoriesByFilmId(Integer id) {
+<span class="nc" id="L115">        Film film = filmRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (film == null) {</span>
+<span class="nc" id="L117">            return null;</span>
+        }
+<span class="nc" id="L119">        List&lt;CategoryDto&gt; categories = film.getCategories().stream()</span>
+<span class="nc" id="L120">                .map(category -&gt; modelMapper.map(category, CategoryDto.class))</span>
+<span class="nc" id="L121">                .collect(Collectors.toList());</span>
+<span class="nc" id="L122">        return categories;</span>
+    }
+
+    @Override
+    public List&lt;ActorDto&gt; getAllActorsByFilmId(Integer id) {
+<span class="nc" id="L127">        Film film = filmRepository.findById(id).orElse(null);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (film == null) {</span>
+<span class="nc" id="L129">            return null;</span>
+        }
+<span class="nc" id="L131">        List&lt;ActorDto&gt; actors = film.getActors().stream()</span>
+<span class="nc" id="L132">                .map(actor -&gt; modelMapper.map(actor, ActorDto.class))</span>
+<span class="nc" id="L133">                .collect(Collectors.toList());</span>
+<span class="nc" id="L134">        return actors;</span>
+    }
+
+    @Override
+    public void addActorToFilm(Integer idFilm, Integer idActor) {
+<span class="nc" id="L139">        Film film = filmRepository.findById(idFilm).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;No se encuentra la película con id: &quot; + idFilm));</span>
+<span class="nc" id="L140">        Actor actor = actorRepository.findById(idActor).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;No se encuentra el actor con id: &quot; + idActor));</span>
+<span class="nc" id="L141">        film.getActors().add(actor);</span>
+<span class="nc" id="L142">        filmRepository.save(film);</span>
+<span class="nc" id="L143">    }</span>
+
+    @Override
+    public void addCategoryToFilm(Integer idFilm, Integer idCategory) {
+<span class="nc" id="L147">        Film film = filmRepository.findById(idFilm).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;No se encuentra la película con id: &quot; + idFilm));</span>
+<span class="nc" id="L148">        Category category = categoryRepository.findById(idCategory).orElseThrow(() -&gt; new ResourceNotFoundException(&quot;No se encuentra la categoría con id: &quot; + idCategory));</span>
+
+<span class="nc" id="L150">        film.getCategories().add(category);</span>
+<span class="nc" id="L151">        filmRepository.save(film);</span>
+
+<span class="nc" id="L153">    }</span>
+
+
+    void validateFilm(FilmDto film) {
+
+<span class="nc bnc" id="L158" title="All 4 branches missed.">        if(film.getTitle() == null || film.getTitle().isEmpty()) {</span>
+<span class="nc" id="L159">            throw new ValidationException(&quot;El nombre de la película no puede estar vacío&quot;);</span>
+        }
+<span class="nc bnc" id="L161" title="All 4 branches missed.">        if(film.getDuration() == null || film.getDuration() &lt;= 0) {</span>
+<span class="nc" id="L162">            throw new ValidationException(&quot;La duración de la película no puede ser menor o igual a 0&quot;);</span>
+        }
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        if(film.getSynopsis() == null || film.getSynopsis().isEmpty()) {</span>
+<span class="nc" id="L165">            throw new ValidationException(&quot;La sinopsis de la película no puede estar vacía&quot;);</span>
+        }
+<span class="nc bnc" id="L167" title="All 4 branches missed.">        if(film.getYear() == null || film.getYear() &lt;= 0) {</span>
+<span class="nc" id="L168">            throw new ValidationException(&quot;El año de la película no puede estar vacío&quot;);</span>
+        }
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if(film.getContentRating() == null) {</span>
+<span class="nc" id="L171">            throw new ValidationException(&quot;La clasificación de la película no puede estar vacío&quot;);</span>
+        }
+
+<span class="nc" id="L174">    }</span>
+    void existsFilmByTitle(String title) {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (filmRepository.existsFilmByTitle(title)) {</span>
+<span class="nc" id="L177">            throw new ValidationException(&quot;No se puede agregar la película, puesto que una con su mismo titulo ya existe&quot;);</span>
+        }
+<span class="nc" id="L179">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

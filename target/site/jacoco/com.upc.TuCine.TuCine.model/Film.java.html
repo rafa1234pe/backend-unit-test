@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Film.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.model</a> &gt; <span class="el_source">Film.java</span></div><h1>Film.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+<span class="nc bnc" id="L13" title="All 86 branches missed.">@Data</span>
+<span class="nc" id="L14">@Builder</span>
+<span class="fc" id="L15">@NoArgsConstructor</span>
+<span class="nc" id="L16">@AllArgsConstructor</span>
+@Entity
+@Table(name = &quot;Film&quot;)
+public class Film {
+
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
+<span class="nc" id="L23">    private Integer id;</span>
+    @Column(name = &quot;title&quot;, length = 255, nullable = false)
+<span class="nc" id="L25">    private String title;</span>
+    @Column(name = &quot;year&quot;, nullable = false)
+<span class="nc" id="L27">    private Integer year;</span>
+    @Column(name = &quot;synopsis&quot;, length = 5000, nullable = false)
+<span class="nc" id="L29">    private String synopsis;</span>
+    @Column(name = &quot;poster_src&quot;,nullable = false)
+<span class="nc" id="L31">    private String posterSrc;</span>
+    @Column(name = &quot;trailer_src&quot;,nullable = false)
+<span class="nc" id="L33">    private String trailerSrc;</span>
+    @Column(name = &quot;duration&quot;, nullable = false)
+<span class="nc" id="L35">    private Integer duration;</span>
+
+
+/*    private Integer contentRatingId;*/
+
+    @ManyToOne
+    @JoinColumn(name = &quot;content_rating_id&quot;, nullable = false, foreignKey = @ForeignKey(name = &quot;FK_FILM_CONTENTRATING&quot;))
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+<span class="nc" id="L43">    private ContentRating contentRating;</span>
+
+    @JsonIgnore
+    @ManyToMany
+<span class="nc" id="L47">    private List&lt;Actor&gt; actors;</span>
+
+    @JsonIgnore
+    @ManyToMany
+<span class="nc" id="L51">    private List&lt;Category&gt; categories;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

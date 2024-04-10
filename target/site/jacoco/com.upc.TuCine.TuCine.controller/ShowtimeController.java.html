@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShowtimeController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">TuCine</a> &gt; <a href="index.source.html" class="el_package">com.upc.TuCine.TuCine.controller</a> &gt; <span class="el_source">ShowtimeController.java</span></div><h1>ShowtimeController.java</h1><pre class="source lang-java linenums">package com.upc.TuCine.TuCine.controller;
+
+import com.upc.TuCine.TuCine.dto.BusinessTypeDto;
+import com.upc.TuCine.TuCine.dto.PromotionDto;
+import com.upc.TuCine.TuCine.dto.ShowtimeDto;
+import com.upc.TuCine.TuCine.dto.save.Showtime.ShowtimeSaveDto;
+import com.upc.TuCine.TuCine.service.ShowtimeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@CrossOrigin(origins = &quot;*&quot;)
+@Tag(name = &quot;Showtime&quot;, description = &quot;API de Showtimes&quot;)
+@RequestMapping(&quot;/api/TuCine/v1&quot;)
+public class ShowtimeController {
+
+    @Autowired
+    private ShowtimeService showtimeService;
+
+<span class="fc" id="L31">    public ShowtimeController(ShowtimeService showtimeService) {</span>
+<span class="fc" id="L32">        this.showtimeService = showtimeService;</span>
+<span class="fc" id="L33">    }</span>
+
+    //URL: http://localhost:8080/api/TuCine/v1/showtimes
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/showtimes&quot;)
+    @Operation(summary = &quot;Obtener todos los showtimes&quot;)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = &quot;200&quot;,
+                            description = &quot;Se obtuvo la lista de showtimes&quot;,
+                            content = {
+                                    @Content(
+                                            mediaType = &quot;application/json&quot;,
+                                            schema = @Schema(implementation = ShowtimeDto.class,type = &quot;array&quot;)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = &quot;404&quot;,
+                            description = &quot;No se encontraron los showtimes&quot;,
+                            content = @Content
+                    )
+            }
+    )
+    public ResponseEntity&lt;List&lt;ShowtimeDto&gt;&gt; getAllShowtimes() {
+<span class="nc" id="L60">        return new ResponseEntity&lt;&gt;(showtimeService.getAllShowtimes(), HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/showtimes/{id}
+    //Method: GET
+    @Transactional(readOnly = true)
+    @GetMapping(&quot;/showtimes/{id}&quot;)
+    @Operation(summary = &quot;Obtener un showtime mediante su id&quot;)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = &quot;200&quot;, description = &quot;Se obtuvo el showtime&quot;,
+                            content = {
+                                    @Content(mediaType = &quot;application/json&quot;,
+                                            schema= @Schema(implementation = ShowtimeDto.class))
+                            }),
+                    @ApiResponse(responseCode = &quot;404&quot;, description = &quot;No se encontró el showtime&quot;,
+                            content = @Content)
+            }
+    )
+    public ResponseEntity&lt;ShowtimeDto&gt; getShowtimeById(@PathVariable(value = &quot;id&quot;) Integer id) {
+<span class="nc" id="L80">        ShowtimeDto showtimeDto = showtimeService.getShowtimeById(id);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (showtimeDto == null) {</span>
+<span class="nc" id="L82">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L84">        return new ResponseEntity&lt;&gt;(showtimeDto, HttpStatus.OK);</span>
+    }
+
+
+    //URL: http://localhost:8080/api/TuCine/v1/showtimes
+    //Method: POST
+    @Transactional
+    @PostMapping(&quot;/showtimes&quot;)
+    @Operation(summary = &quot;Crear un nuevo showtime&quot;)
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = &quot;201&quot;,
+                            description = &quot;Se creó el showtime&quot;,
+                            content = {
+                                    @Content(
+                                            mediaType = &quot;application/json&quot;,
+                                            schema = @Schema(implementation = ShowtimeDto.class)
+                                    )
+                            }
+                    ),
+                    @ApiResponse(
+                            responseCode = &quot;400&quot;,
+                            description = &quot;No se pudo crear el showtime&quot;,
+                            content = @Content
+                    )
+            }
+    )
+
+    public ResponseEntity&lt;ShowtimeDto&gt; createShowtime(@RequestBody ShowtimeDto showtimeDto) {
+<span class="nc" id="L114">        ShowtimeDto createdShowtimeDto = showtimeService.createShowtime(showtimeDto);</span>
+<span class="nc" id="L115">        return new ResponseEntity&lt;&gt;(createdShowtimeDto, HttpStatus.CREATED);</span>
+    }
+
+
+    //URL: http://localhost:8080/api/TuCine/v1/showtimes/{id}
+    //Method: UPDATE
+    @Transactional
+    @PutMapping(&quot;/showtimes/{id}&quot;)
+
+    @Operation(summary = &quot;Actualizar un showtime&quot;)
+    public ResponseEntity&lt;ShowtimeDto&gt; updateShowtime(@PathVariable(value = &quot;id&quot;) Integer id, @RequestBody ShowtimeDto showtimeDto ) {
+<span class="nc" id="L126">        ShowtimeDto updatedShowtimeDto = showtimeService.updateShowtime(id, showtimeDto);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        if (updatedShowtimeDto == null) {</span>
+<span class="nc" id="L128">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L130">        return new ResponseEntity&lt;&gt;(updatedShowtimeDto, HttpStatus.OK);</span>
+    }
+
+    //URL: http://localhost:8080/api/TuCine/v1/showtimes/{id}
+    //Method: DELETE
+    @Transactional
+    @DeleteMapping(&quot;/showtimes/{id}&quot;)
+    @Operation(summary = &quot;Borrar un showtime mediante su id&quot;)
+    public ResponseEntity&lt;Void&gt; deleteShowtime(@PathVariable(value = &quot;id&quot;) Integer id) {
+<span class="nc" id="L139">        ShowtimeDto deletedShowtimeDto = showtimeService.deleteShowtime(id);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (deletedShowtimeDto == null) {</span>
+<span class="nc" id="L141">            return new ResponseEntity&lt;&gt;(HttpStatus.NOT_FOUND);</span>
+        }
+<span class="nc" id="L143">        return new ResponseEntity&lt;&gt;(HttpStatus.OK);</span>
+    }
+
+    // URL: http://localhost:8080/api/TuCine/v1/showtimes/{filmId}/{businessId}
+    // Method: GET
+    @GetMapping(&quot;/showtimes/{filmId}/{businessId}&quot;)
+    public ResponseEntity&lt;List&lt;ShowtimeDto&gt;&gt; getShowtimesByFilmAndBusiness(
+            @PathVariable(&quot;filmId&quot;) Integer filmId,
+            @PathVariable(&quot;businessId&quot;) Integer businessId
+    ) {
+<span class="nc" id="L153">        List&lt;ShowtimeDto&gt; showtimes = showtimeService.getShowtimesByFilmAndBusiness(filmId, businessId);</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (showtimes.isEmpty()) {</span>
+<span class="nc" id="L155">            return ResponseEntity.notFound().build(); // Manejar caso en el que no se encuentren showtimes</span>
+        }
+<span class="nc" id="L157">        return new ResponseEntity&lt;&gt;(showtimes, HttpStatus.OK);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
